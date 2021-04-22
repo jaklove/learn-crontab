@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"learn-crontab/master/pkg/app"
 	"learn-crontab/master/service"
@@ -36,6 +37,60 @@ func SaveJob(c *gin.Context) {
 	return
 }
 
+//删除任务
 func DeleteJob(c *gin.Context)  {
+	var (
+		appG = app.Gin{C: c}
+	)
+	//获取name
+	name := c.Query("name")
+	if name == ""{
+		appG.Response(400,"添加任务失败",errors.New("当前name不能为空"))
+		return
+	}
 
+	oldJob, err := service.Global_JobMgr.DeleteJobByName(name)
+	if err != nil{
+		appG.Response(400,"任务失败失败",nil)
+		return
+	}
+	appG.Response(200,"success",oldJob)
+	return
+}
+
+//获取任务列表
+func JobList(c * gin.Context)  {
+	var (
+		appG = app.Gin{C: c}
+	)
+
+	list, err := service.Global_JobMgr.GetJobList()
+	if err != nil{
+		appG.Response(500,err.Error(),nil)
+		return
+	}
+	appG.Response(200,"success",list)
+	return
+}
+
+//杀死任务
+func KillJob(c *gin.Context)  {
+	var (
+		appG = app.Gin{C: c}
+	)
+	//任务名称
+	name := c.Query("name")
+	if name == ""{
+		appG.Response(400,"添加任务失败",errors.New("当前name不能为空"))
+		return
+	}
+
+	err := service.Global_JobMgr.KillJob(name)
+	if err != nil{
+		appG.Response(400,"kill任务失败",err)
+		return
+	}
+
+	appG.Response(200,"success",nil)
+	return
 }

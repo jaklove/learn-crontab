@@ -11,7 +11,13 @@ func InitRouter()*gin.Engine  {
 	{
 		//添加任务
 		apiv1.POST("/job/save",v1.SaveJob)
-		apiv1.POST("/job/delete",v1.DeleteJob)
+		//删除任务
+		apiv1.GET("/job/delete",v1.DeleteJob)
+		//获取任务列表
+		apiv1.GET("/job/list",v1.JobList)
+		//杀死任务
+		apiv1.GET("/job/kill",v1.KillJob)
+
 	}
 
 	return r
