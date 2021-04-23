@@ -18,6 +18,8 @@ func InitRouter()*gin.Engine  {
 		//杀死任务
 		apiv1.GET("/job/kill",v1.KillJob)
 
+		apiv1.GET("/worker/list",v1.HandleWorkerList)
+
 	}
 
 	return r

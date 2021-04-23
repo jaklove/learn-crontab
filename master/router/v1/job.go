@@ -94,3 +94,19 @@ func KillJob(c *gin.Context)  {
 	appG.Response(200,"success",nil)
 	return
 }
+
+// 获取健康worker节点列表
+func HandleWorkerList(c *gin.Context)  {
+	var (
+		appG = app.Gin{C: c}
+	)
+
+	listWorkers, err := service.G_workerMgr.ListWorkers()
+	if err != nil{
+		appG.Response(400,"工作任务列表失败",err)
+		return
+	}
+
+	appG.Response(200,"sucess",listWorkers)
+	return
+}

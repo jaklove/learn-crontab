@@ -23,6 +23,11 @@ func main() {
 	//初始化配置
 	setting.InitConfig()
 
+	// 初始化服务发现模块
+	if err = service.InitWorkerMgr(); err != nil {
+		log.Fatalf("master.InitWorkerMgr err: %v", err)
+	}
+
 	//初始化任务
 	err = service.InitJobMgr()
 	if err != nil {
