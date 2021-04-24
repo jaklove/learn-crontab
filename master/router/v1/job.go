@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"learn-crontab/master/pkg/app"
 	"learn-crontab/master/service"
@@ -27,6 +28,7 @@ func SaveJob(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("name:",form.Name)
 	//添加任务到etcd中
 	oldJob, err := service.Global_JobMgr.AddJob(form.Name,form.Command,form.CronExpr)
 	if err != nil{
@@ -68,6 +70,9 @@ func JobList(c * gin.Context)  {
 	if err != nil{
 		appG.Response(500,err.Error(),nil)
 		return
+	}
+	if list == nil{
+		list = nil
 	}
 	appG.Response(200,"success",list)
 	return
