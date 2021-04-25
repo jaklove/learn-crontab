@@ -1,6 +1,7 @@
 package main
 
 import (
+	"learn-crontab/worker/Scheduler"
 	"learn-crontab/worker/job"
 	"learn-crontab/worker/pkg/worker"
 	"log"
@@ -20,6 +21,11 @@ func main()  {
 	//初始化配置
 	if err = worker.InitConfig();err != nil{
 		log.Fatalf("worker.InitConfig err: %v",err)
+	}
+
+	//调度任务
+	if err = Scheduler.InitScheduler();err != nil{
+		log.Fatalf("Scheduler.InitScheduler err: %v",err)
 	}
 
 	//监听任务
