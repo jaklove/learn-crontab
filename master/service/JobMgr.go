@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"go.etcd.io/etcd/clientv3"
 	"learn-crontab/master/common"
 	"learn-crontab/master/pkg/setting"
@@ -150,6 +151,7 @@ func (j *JobMgr) GetJobList() ([]*AddJob, error) {
 
 
 func (j *JobMgr) KillJob(name string)error {
+	fmt.Println(name)
 	var (
 		err error
 		leaseGrantResp *clientv3.LeaseGrantResponse
