@@ -2,7 +2,6 @@ package job
 
 import (
 	"context"
-	"fmt"
 	"github.com/coreos/etcd/mvcc/mvccpb"
 	"go.etcd.io/etcd/clientv3"
 	"learn-crontab/master/common"
@@ -67,7 +66,7 @@ func (jobMgr *JobMgr) watchJobs() error {
 		watchChan     clientv3.WatchChan
 		watchResponse clientv3.WatchResponse
 		watchEvents   *clientv3.Event
-		jobEvent       *common.JobEvent
+		jobEvent      *common.JobEvent
 	)
 
 	//1.get一下/cron/jobs/目录下的所有任务，并且获知当前集群的revision
@@ -81,7 +80,7 @@ func (jobMgr *JobMgr) watchJobs() error {
 		if job, err = common.UnpackJob(kv.Value); err != nil {
 			continue;
 		}
-		//TODO
+		//TODO 通过构建事件进行任务调度
 		jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE,job)
 		Scheduler.G_scheduler.PushJobEvent(jobEvent)
 	}
@@ -112,8 +111,6 @@ func (jobMgr *JobMgr) watchJobs() error {
 					//构建一个删除evenet
 					jobEvent = common.BuildJobEvent(common.JOB_EVENT_DELETE,job)
 				}
-				fmt.Println("监听任务:",jobEvent.Job.Name)
-
 				//投递任务
 				Scheduler.G_scheduler.PushJobEvent(jobEvent)
 			}

@@ -23,6 +23,11 @@ func main()  {
 		log.Fatalf("worker.InitConfig err: %v",err)
 	}
 
+	// 启动执行器
+	if err = Scheduler.InitExecutor(); err != nil {
+		log.Fatalf("job.InitExecutor err: %v",err)
+	}
+
 	//调度任务
 	if err = Scheduler.InitScheduler();err != nil{
 		log.Fatalf("Scheduler.InitScheduler err: %v",err)
