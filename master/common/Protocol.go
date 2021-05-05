@@ -16,12 +16,12 @@ type Job struct {
 }
 
 // 提取worker的IP
-func ExtractWorkerIP(regKey string) (string) {
+func ExtractWorkerIP(regKey string) string {
 	return strings.TrimPrefix(regKey, JOB_WORKER_DIR)
 }
 
 // 从 /cron/killer/job10提取job10
-func ExtractKillerName(killerKey string) (string) {
+func ExtractKillerName(killerKey string) string {
 	return strings.TrimPrefix(killerKey, JOB_KILLER_DIR)
 }
 

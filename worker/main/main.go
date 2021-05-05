@@ -22,7 +22,7 @@ func main()  {
 		log.Fatalf("worker.InitConfig err: %v",err)
 	}
 
-	//服务zhuce
+	//服务注册
 	if err = job.InitRegister();err != nil{
 		log.Fatalf("job.InitRegister err: %v",err)
 	}
@@ -33,8 +33,8 @@ func main()  {
 	}
 
 	//执行任务
-	if err = job.InitExecutor();err != nil{
-		log.Fatalf("Scheduler.InitExecutor err: %v",err)
+	if err = job.InitExecutor();err != nil {
+		log.Fatalf("Scheduler.InitExecutor err: %v", err)
 	}
 
 	//调度任务

@@ -2,7 +2,6 @@ package job
 
 import (
 	"context"
-	"fmt"
 	"github.com/coreos/etcd/mvcc/mvccpb"
 	"go.etcd.io/etcd/clientv3"
 	"learn-crontab/master/common"
@@ -86,6 +85,7 @@ func (jobMgr *JobMgr) watchJobs() error {
 		if job, err = common.UnpackJob(kv.Value); err != nil {
 			continue;
 		}
+
 		//TODO
 		jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE, job)
 		G_scheduler.PushJobEvent(jobEvent)
