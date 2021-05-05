@@ -225,7 +225,7 @@
                     dataType: 'json',
                     data: {name: jobName},
                     success: function(resp) {
-                        if (resp.errno != 0) {
+                        if (resp.code != 200) {
                             return
                         }
                         // 遍历日志
@@ -261,7 +261,7 @@
                     url: '/api/v1/worker/list',
                     dataType: 'json',
                     success: function(resp) {
-                        if (resp.errno != 0) {
+                        if (resp.code != 200) {
                             return
                         }
 

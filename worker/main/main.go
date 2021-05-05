@@ -1,7 +1,6 @@
 package main
 
 import (
-	"learn-crontab/worker/Scheduler"
 	"learn-crontab/worker/job"
 	"learn-crontab/worker/pkg/worker"
 	"log"
@@ -23,8 +22,23 @@ func main()  {
 		log.Fatalf("worker.InitConfig err: %v",err)
 	}
 
+	//服务zhuce
+	if err = job.InitRegister();err != nil{
+		log.Fatalf("job.InitRegister err: %v",err)
+	}
+
+	// 启动日志协程
+	if err = job.InitLogSink(); err != nil {
+		log.Fatalf("job.InitLogSink err: %v",err)
+	}
+
+	//执行任务
+	if err = job.InitExecutor();err != nil{
+		log.Fatalf("Scheduler.InitExecutor err: %v",err)
+	}
+
 	//调度任务
-	if err = Scheduler.InitScheduler();err != nil{
+	if err = job.InitScheduler();err != nil{
 		log.Fatalf("Scheduler.InitScheduler err: %v",err)
 	}
 

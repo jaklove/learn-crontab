@@ -25,13 +25,18 @@ func main() {
 
 	// 初始化服务发现模块
 	if err = service.InitWorkerMgr(); err != nil {
-		log.Fatalf("master.InitWorkerMgr err: %v", err)
+		log.Fatalf("service.InitWorkerMgr err: %v", err)
+	}
+
+	// 日志管理器
+	if err = service.InitLogMgr(); err != nil {
+		log.Fatalf("service.InitLogMgr err: %v", err)
 	}
 
 	//初始化任务
 	err = service.InitJobMgr()
 	if err != nil {
-		log.Fatalf("master.InitJobMgr err: %v", err)
+		log.Fatalf("service.InitJobMgr err: %v", err)
 	}
 
 	//初始化api

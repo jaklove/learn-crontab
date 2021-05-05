@@ -6,7 +6,7 @@ import (
 	"github.com/coreos/etcd/mvcc/mvccpb"
 	"go.etcd.io/etcd/clientv3"
 	"learn-crontab/master/common"
-	"learn-crontab/worker/Scheduler"
+	"learn-crontab/worker/pkg/lock"
 	"learn-crontab/worker/pkg/worker"
 	"time"
 )
@@ -51,9 +51,14 @@ func InitJobMgr() error {
 		watcher: watcher,
 	}
 
-	if err = Worker_JobMgr.watchJobs();err != nil{
+	// 启动任务监听
+	if err = Worker_JobMgr.watchJobs(); err != nil {
 		return err
 	}
+
+	// 启动监听killer
+	Worker_JobMgr.watchKiller()
+
 	return nil
 }
 
@@ -67,7 +72,7 @@ func (jobMgr *JobMgr) watchJobs() error {
 		watchChan     clientv3.WatchChan
 		watchResponse clientv3.WatchResponse
 		watchEvents   *clientv3.Event
-		jobEvent       *common.JobEvent
+		jobEvent      *common.JobEvent
 	)
 
 	//1.get一下/cron/jobs/目录下的所有任务，并且获知当前集群的revision
@@ -82,8 +87,8 @@ func (jobMgr *JobMgr) watchJobs() error {
 			continue;
 		}
 		//TODO
-		jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE,job)
-		Scheduler.G_scheduler.PushJobEvent(jobEvent)
+		jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE, job)
+		G_scheduler.PushJobEvent(jobEvent)
 	}
 
 	//2, 从该revision向后监听变化事件
@@ -91,35 +96,74 @@ func (jobMgr *JobMgr) watchJobs() error {
 		//监听下一个版本
 		watchStartRev = getResponse.Header.Revision + 1
 		//启动监听
-		watchChan = jobMgr.watcher.Watch(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithRev(watchStartRev),clientv3.WithPrefix())
+		watchChan = jobMgr.watcher.Watch(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithRev(watchStartRev), clientv3.WithPrefix())
 
 		for watchResponse = range watchChan {
-			for _,watchEvents = range watchResponse.Events {
+			for _, watchEvents = range watchResponse.Events {
 				switch watchEvents.Type {
 				case mvccpb.PUT: //任务保存
 					if job, err = common.UnpackJob(watchEvents.Kv.Value); err != nil {
 						continue
 					}
 					//构建一个event事件
-					jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE,job)
+					jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE, job)
 					//TODO：反序列化job,推送给scheduler
 				case mvccpb.DELETE: //删除任务
-					jobName := common.ExtractKillerName(string(watchEvents.Kv.Key))
+					jobName := common.ExtractJobName(string(watchEvents.Kv.Key))
 
 					job = &common.Job{
-						Name:jobName,
+						Name: jobName,
 					}
 					//构建一个删除evenet
-					jobEvent = common.BuildJobEvent(common.JOB_EVENT_DELETE,job)
+					jobEvent = common.BuildJobEvent(common.JOB_EVENT_DELETE, job)
 				}
-				fmt.Println("监听任务:",jobEvent.Job.Name)
-
 				//投递任务
-				Scheduler.G_scheduler.PushJobEvent(jobEvent)
+				G_scheduler.PushJobEvent(jobEvent)
 			}
-
 		}
 	}()
-
 	return nil
+}
+
+//监听强杀任务通知
+func (jobMgr *JobMgr) watchKiller() {
+	var (
+		watchChan  clientv3.WatchChan
+		watchEvent *clientv3.Event
+		watchResp  clientv3.WatchResponse
+		jobName    string
+		job        *common.Job
+		jobEvent   *common.JobEvent
+	)
+
+	//监听/cron/killer目录
+	go func() {
+		//监听/cron/killer/目录的变化
+		watchChan = jobMgr.watcher.Watch(context.TODO(), common.JOB_KILLER_DIR, clientv3.WithPrefix())
+
+		//处理监听事件
+		for watchResp = range watchChan {
+			for _, watchEvent = range watchResp.Events {
+				switch watchEvent.Type {
+				case mvccpb.PUT: //杀死任务事件
+					jobName = common.ExtractKillerName(string(watchEvent.Kv.Key))
+					job = &common.Job{
+						Name: jobName,
+					}
+					fmt.Println("监听的任务名字:",job.Name)
+					jobEvent = common.BuildJobEvent(common.JOB_EVENT_KILL,job)
+					// 事件推给scheduler
+					G_scheduler.PushJobEvent(jobEvent)
+				case mvccpb.DELETE:
+				}
+			}
+		}
+	}()
+}
+
+// 创建任务执行锁
+func (jobMgr *JobMgr) CreateJobLock(jobName string) *lock.JobLock {
+	var jobLock *lock.JobLock
+	jobLock = lock.InitJobLock(jobName, jobMgr.kv, jobMgr.lease)
+	return jobLock
 }
