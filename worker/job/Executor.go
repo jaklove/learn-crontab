@@ -2,7 +2,7 @@ package job
 
 import (
 	"fmt"
-	"learn-crontab/master/common"
+	"learn-crontab/worker/common"
 	"learn-crontab/worker/pkg/lock"
 	"math/rand"
 	"os/exec"

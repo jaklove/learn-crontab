@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/coreos/etcd/mvcc/mvccpb"
 	"go.etcd.io/etcd/clientv3"
-	"learn-crontab/master/common"
+	"learn-crontab/worker/common"
 	"learn-crontab/worker/pkg/lock"
 	"learn-crontab/worker/pkg/worker"
 	"time"
@@ -150,7 +150,6 @@ func (jobMgr *JobMgr) watchKiller() {
 					job = &common.Job{
 						Name: jobName,
 					}
-					fmt.Println("监听的任务名字:",job.Name)
 					jobEvent = common.BuildJobEvent(common.JOB_EVENT_KILL,job)
 					// 事件推给scheduler
 					G_scheduler.PushJobEvent(jobEvent)

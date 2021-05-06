@@ -3,7 +3,7 @@ package job
 import (
 	"context"
 	"go.etcd.io/etcd/clientv3"
-	"learn-crontab/master/common"
+	"learn-crontab/worker/common"
 	"learn-crontab/worker/pkg/worker"
 	"net"
 	"time"

@@ -4,7 +4,8 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"learn-crontab/master/common"
+	"learn-crontab/worker/common"
+	"learn-crontab/worker/pkg/worker"
 	"time"
 )
 
@@ -87,7 +88,7 @@ func InitLogSink() error {
 	)
 
 	//建立mongodb连接
-	if client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://192.168.111.100:27017"),
+	if client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(worker.WorkerSetting.MongodbUri),
 		options.Client().SetConnectTimeout(5000 * time.Millisecond) ); err != nil {
 		return err
 	}
