@@ -1,0 +1,10 @@
+FROM  golang
+MAINTAINER zhourenjie
+WORKDIR /go/src/app/
+COPY . .
+ENV GOPROXY https://goproxy.io
+RUN cd /go/src/app/
+RUN go build master/main/main.go
+EXPOSE 8070
+ENTRYPOINT ["./main"]
+
