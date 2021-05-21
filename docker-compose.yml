@@ -1,0 +1,11 @@
+version: '2'
+networks:
+  basic:
+services:
+  corntab:
+    container_name: go-corntab
+    image: go-corntab
+    ports:
+    - "8070:8070"
+    volumes:
+    - ./:/
